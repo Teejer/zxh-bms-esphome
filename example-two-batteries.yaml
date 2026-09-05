@@ -1,0 +1,102 @@
+# Two batteries on ONE ESP32, read one at a time (sequential multiplexing).
+#
+# Each `zxh_bms` hub below owns one BLE client but shares a single radio
+# slot: when a hub's update_interval elapses it queues a cycle, the
+# scheduler connects to that battery, runs the read, disconnects, and hands
+# the radio to the next battery that is waiting. Only one BLE link is ever
+# open. A battery that is off/unreachable is skipped after `cycle_timeout`.
+#
+# For the full list of sensors/entities, see example-zxh-bms.yaml.
+
+esphome:
+  name: zxh-bms-mux
+  friendly_name: ZXH BMS Multi-Pack Gateway
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+external_components:
+  - source:
+      type: local
+      path: components
+
+wifi:
+  ssid: "your-wifi-ssid"
+  password: "your-wifi-password"
+
+api:
+ota:
+  - platform: esphome
+
+logger:
+
+esp32_ble_tracker:
+
+ble_client:
+  - mac_address: AA:BB:CC:DD:EE:01
+    id: bms_a_ble
+  - mac_address: AA:BB:CC:DD:EE:02
+    id: bms_b_ble
+
+zxh_bms:
+  - id: batt_a
+    ble_client_id: bms_a_ble
+    mode: sequential       # round-robin over the radio
+    update_interval: 2min  # how often THIS pack gets polled
+    cycle_timeout: 90s     # give up (and move on) if a full cycle stalls
+
+  - id: batt_b
+    ble_client_id: bms_b_ble
+    mode: sequential
+    update_interval: 2min
+
+binary_sensor:
+  - platform: zxh_bms
+    zxh_bms_id: batt_a
+    protection_active:
+      name: "Pack A Protection Active"
+  - platform: zxh_bms
+    zxh_bms_id: batt_b
+    protection_active:
+      name: "Pack B Protection Active"
+
+text_sensor:
+  - platform: zxh_bms
+    zxh_bms_id: batt_a
+    cells:
+      name: "Pack A Cell Voltages"
+  - platform: zxh_bms
+    zxh_bms_id: batt_b
+    cells:
+      name: "Pack B Cell Voltages"
+
+sensor:
+  - platform: zxh_bms
+    zxh_bms_id: batt_a
+    voltage:
+      name: "Pack A Voltage"
+    current:
+      name: "Pack A Current"
+    soc:
+      name: "Pack A SOC"
+    cell_delta:
+      name: "Pack A Cell Delta"
+    temperature:
+      - probe: 1
+        name: "Pack A Temperature"
+
+  - platform: zxh_bms
+    zxh_bms_id: batt_b
+    voltage:
+      name: "Pack B Voltage"
+    current:
+      name: "Pack B Current"
+    soc:
+      name: "Pack B SOC"
+    cell_delta:
+      name: "Pack B Cell Delta"
+    temperature:
+      - probe: 1
+        name: "Pack B Temperature"

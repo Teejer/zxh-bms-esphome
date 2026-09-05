@@ -1,0 +1,104 @@
+# Example ESPHome config for a zxh/uni-app family BLE LiFePO4 BMS.
+#
+# Place this file next to the components/ directory (or adjust the
+# external_components path), replace the wifi credentials and the
+# ble_client MAC address, then: esphome run this-file.yaml
+
+esphome:
+  name: zxh-bms-gateway
+  friendly_name: ZXH BMS Gateway
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+external_components:
+  - source:
+      type: local
+      path: components
+
+wifi:
+  ssid: "your-wifi-ssid"
+  password: "your-wifi-password"
+
+api:
+ota:
+  - platform: esphome
+
+logger:
+
+# ble_client requires the BLE tracker to find the battery
+esp32_ble_tracker:
+
+ble_client:
+  - mac_address: AA:BB:CC:DD:EE:FF
+    id: bms_ble
+
+# Read-only BLE client for the BMS.
+# The Modbus bus address is auto-discovered after every connect; only set
+# `address:` explicitly if discovery fails on a particular board.
+# `mode: persistent` (default) keeps the BLE link open between polls; use
+# `mode: sequential` to share one ESP32 across several batteries one at a
+# time (see example-two-batteries.yaml).
+zxh_bms:
+  ble_client_id: bms_ble
+  mode: persistent
+  update_interval: 30s   # polling cycle: one full read of the pack per interval
+  # address: 1
+
+binary_sensor:
+  - platform: zxh_bms
+    protection_active:
+      name: "BMS Protection Active"
+    balancing:
+      name: "BMS Balancing"
+
+text_sensor:
+  - platform: zxh_bms
+    cells:
+      name: "BMS Cell Voltages"
+    protection:
+      name: "BMS Protection State"
+    firmware_version:
+      name: "BMS Firmware Version"
+    manufacture_date:
+      name: "BMS Manufacture Date"
+
+sensor:
+  - platform: zxh_bms
+    voltage:
+      name: "BMS Pack Voltage"
+    current:
+      name: "BMS Pack Current"
+    power:
+      name: "BMS Pack Power"
+    soc:
+      name: "BMS SOC"
+    cell_min:
+      name: "BMS Min Cell"
+    cell_max:
+      name: "BMS Max Cell"
+    cell_delta:
+      name: "BMS Cell Delta"
+    remaining_capacity:
+      name: "BMS Remaining Capacity"
+    cycles:
+      name: "BMS Cycle Count"
+    health:
+      name: "BMS Health"
+    mos_temperature:
+      name: "BMS MOS Temperature"
+    cell_count:
+      name: "BMS Cell Count"
+    nominal_voltage:
+      name: "BMS Nominal Voltage"
+    nominal_capacity:
+      name: "BMS Nominal Capacity"
+    full_capacity:
+      name: "BMS Full Capacity"
+    temperature:
+      - probe: 1
+        name: "BMS Temperature 1"
+      - probe: 2
+        name: "BMS Temperature 2"
