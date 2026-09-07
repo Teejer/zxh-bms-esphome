@@ -67,10 +67,14 @@ text_sensor:
     zxh_bms_id: batt_a
     cells:
       name: "Pack A Cell Voltages"
+    device_name:
+      name: "Pack A Bluetooth Name"
   - platform: zxh_bms
     zxh_bms_id: batt_b
     cells:
       name: "Pack B Cell Voltages"
+    device_name:
+      name: "Pack B Bluetooth Name"
 
 sensor:
   - platform: zxh_bms

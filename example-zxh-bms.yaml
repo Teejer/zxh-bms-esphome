@@ -64,6 +64,8 @@ text_sensor:
       name: "BMS Firmware Version"
     manufacture_date:
       name: "BMS Manufacture Date"
+    device_name:
+      name: "BMS Bluetooth Name"
 
 sensor:
   - platform: zxh_bms

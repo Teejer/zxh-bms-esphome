@@ -43,7 +43,9 @@ mode (see [Multiple batteries](#multiple-batteries)).
 - Sensors: pack voltage (sum of cells), current, power, SOC, min/max/delta
   cell, remaining capacity, cycles, health, MOS temp, up to 4 temp probes,
   label info (cell count, nominal/full Ah). Text sensors: per-cell voltages
-  as JSON, active protection faults, firmware version, manufacture date.
+  as JSON, active protection faults, firmware version, manufacture date,
+  and the BMS Bluetooth device name read from GATT (0x2A00, e.g.
+  `ZXH16S100A-*`) via the `device_name:` text sensor.
   Binary sensors: protection active, balancing active.
 
 ## Usage
