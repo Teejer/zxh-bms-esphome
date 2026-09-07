@@ -60,28 +60,28 @@ zxh_bms:
   - id: pack_1
     ble_client_id: ble_pack_1
     mode: sequential
-    update_interval: 5min
+    update_interval: 2min
     cycle_timeout: 90s
 
   - id: pack_2
     ble_client_id: ble_pack_2
     mode: sequential
-    update_interval: 5min
+    update_interval: 2min
 
   - id: pack_3
     ble_client_id: ble_pack_3
     mode: sequential
-    update_interval: 5min
+    update_interval: 2min
 
   - id: pack_4
     ble_client_id: ble_pack_4
     mode: sequential
-    update_interval: 5min
+    update_interval: 2min
 
   - id: pack_5
     ble_client_id: ble_pack_5
     mode: sequential
-    update_interval: 5min
+    update_interval: 2min
 
 # ---------------------------------------------------------------------------
 # Entities. Every block names its pack with zxh_bms_id; the name: values are

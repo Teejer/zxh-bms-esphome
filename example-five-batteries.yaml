@@ -31,6 +31,11 @@ ota:
 
 logger:
 
+# Five clients need five BLE connection slots; ESPHome's default of 3 leaves the
+# extra ble_clients marked FAILED ("Failed due to no resources") at boot.
+esp32_ble:
+  max_connections: 5
+
 esp32_ble_tracker:
 
 # ---------------------------------------------------------------------------
