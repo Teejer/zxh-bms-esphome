@@ -1,0 +1,303 @@
+# Five LiFePO4 packs on ONE ESP32, read one at a time (sequential mode).
+#
+# Only one BLE link is ever open: when a pack's update_interval elapses the
+# scheduler connects to it, runs the read, disconnects, and hands the radio
+# to the next pack that is waiting. A pack that is off/unreachable is
+# abandoned after cycle_timeout so it never blocks the others.
+#
+# WiFi + battery MACs live in secrets.yaml (gitignored).
+# Find/verify MACs with:  bms-cli scan
+
+esphome:
+  name: zxh-bms-mux
+  friendly_name: ZXH BMS Multi-Pack Gateway
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+external_components:
+  - source:
+      type: local
+      path: components
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+ota:
+  - platform: esphome
+
+logger:
+
+esp32_ble:
+  max_connections: 5
+
+esp32_ble_tracker:
+
+# ---------------------------------------------------------------------------
+# BLE links (one per pack; MAC address of the battery)
+# ---------------------------------------------------------------------------
+ble_client:
+  - mac_address: !secret bms_mac_1
+    id: ble_pack_1
+  - mac_address: !secret bms_mac_2
+    id: ble_pack_2
+  - mac_address: !secret bms_mac_3
+    id: ble_pack_3
+  - mac_address: !secret bms_mac_4
+    id: ble_pack_4
+  - mac_address: !secret bms_mac_5
+    id: ble_pack_5
+
+# ---------------------------------------------------------------------------
+# Protocol hubs: one per pack, sharing the radio one connection at a time.
+# Each pack can have its own polling frequency via update_interval.
+# ---------------------------------------------------------------------------
+zxh_bms:
+  - id: pack_1
+    ble_client_id: ble_pack_1
+    mode: sequential
+    update_interval: 5min
+    cycle_timeout: 90s
+
+  - id: pack_2
+    ble_client_id: ble_pack_2
+    mode: sequential
+    update_interval: 5min
+
+  - id: pack_3
+    ble_client_id: ble_pack_3
+    mode: sequential
+    update_interval: 5min
+
+  - id: pack_4
+    ble_client_id: ble_pack_4
+    mode: sequential
+    update_interval: 5min
+
+  - id: pack_5
+    ble_client_id: ble_pack_5
+    mode: sequential
+    update_interval: 5min
+
+# ---------------------------------------------------------------------------
+# Entities. Every block names its pack with zxh_bms_id; the name: values are
+# what show up in Home Assistant. Drop any entity you don't want.
+# ---------------------------------------------------------------------------
+binary_sensor:
+  - platform: zxh_bms
+    zxh_bms_id: pack_1
+    protection_active:
+      name: "Pack 1 Protection Active"
+    balancing:
+      name: "Pack 1 Balancing"
+  - platform: zxh_bms
+    zxh_bms_id: pack_2
+    protection_active:
+      name: "Pack 2 Protection Active"
+    balancing:
+      name: "Pack 2 Balancing"
+  - platform: zxh_bms
+    zxh_bms_id: pack_3
+    protection_active:
+      name: "Pack 3 Protection Active"
+    balancing:
+      name: "Pack 3 Balancing"
+  - platform: zxh_bms
+    zxh_bms_id: pack_4
+    protection_active:
+      name: "Pack 4 Protection Active"
+    balancing:
+      name: "Pack 4 Balancing"
+  - platform: zxh_bms
+    zxh_bms_id: pack_5
+    protection_active:
+      name: "Pack 5 Protection Active"
+    balancing:
+      name: "Pack 5 Balancing"
+
+text_sensor:
+  - platform: zxh_bms
+    zxh_bms_id: pack_1
+    cells:
+      name: "Pack 1 Cell Voltages"
+    protection:
+      name: "Pack 1 Protection State"
+  - platform: zxh_bms
+    zxh_bms_id: pack_2
+    cells:
+      name: "Pack 2 Cell Voltages"
+    protection:
+      name: "Pack 2 Protection State"
+  - platform: zxh_bms
+    zxh_bms_id: pack_3
+    cells:
+      name: "Pack 3 Cell Voltages"
+    protection:
+      name: "Pack 3 Protection State"
+  - platform: zxh_bms
+    zxh_bms_id: pack_4
+    cells:
+      name: "Pack 4 Cell Voltages"
+    protection:
+      name: "Pack 4 Protection State"
+  - platform: zxh_bms
+    zxh_bms_id: pack_5
+    cells:
+      name: "Pack 5 Cell Voltages"
+    protection:
+      name: "Pack 5 Protection State"
+
+sensor:
+  - platform: zxh_bms
+    zxh_bms_id: pack_1
+    voltage:
+      name: "Pack 1 Voltage"
+    current:
+      name: "Pack 1 Current"
+    power:
+      name: "Pack 1 Power"
+    soc:
+      name: "Pack 1 SOC"
+    cell_min:
+      name: "Pack 1 Min Cell"
+    cell_max:
+      name: "Pack 1 Max Cell"
+    cell_delta:
+      name: "Pack 1 Cell Delta"
+    remaining_capacity:
+      name: "Pack 1 Remaining Capacity"
+    cycles:
+      name: "Pack 1 Cycles"
+    health:
+      name: "Pack 1 Health"
+    mos_temperature:
+      name: "Pack 1 MOS Temperature"
+    temperature:
+      - probe: 1
+        name: "Pack 1 Temperature 1"
+      - probe: 2
+        name: "Pack 1 Temperature 2"
+
+  - platform: zxh_bms
+    zxh_bms_id: pack_2
+    voltage:
+      name: "Pack 2 Voltage"
+    current:
+      name: "Pack 2 Current"
+    power:
+      name: "Pack 2 Power"
+    soc:
+      name: "Pack 2 SOC"
+    cell_min:
+      name: "Pack 2 Min Cell"
+    cell_max:
+      name: "Pack 2 Max Cell"
+    cell_delta:
+      name: "Pack 2 Cell Delta"
+    remaining_capacity:
+      name: "Pack 2 Remaining Capacity"
+    cycles:
+      name: "Pack 2 Cycles"
+    health:
+      name: "Pack 2 Health"
+    mos_temperature:
+      name: "Pack 2 MOS Temperature"
+    temperature:
+      - probe: 1
+        name: "Pack 2 Temperature 1"
+      - probe: 2
+        name: "Pack 2 Temperature 2"
+
+  - platform: zxh_bms
+    zxh_bms_id: pack_3
+    voltage:
+      name: "Pack 3 Voltage"
+    current:
+      name: "Pack 3 Current"
+    power:
+      name: "Pack 3 Power"
+    soc:
+      name: "Pack 3 SOC"
+    cell_min:
+      name: "Pack 3 Min Cell"
+    cell_max:
+      name: "Pack 3 Max Cell"
+    cell_delta:
+      name: "Pack 3 Cell Delta"
+    remaining_capacity:
+      name: "Pack 3 Remaining Capacity"
+    cycles:
+      name: "Pack 3 Cycles"
+    health:
+      name: "Pack 3 Health"
+    mos_temperature:
+      name: "Pack 3 MOS Temperature"
+    temperature:
+      - probe: 1
+        name: "Pack 3 Temperature 1"
+      - probe: 2
+        name: "Pack 3 Temperature 2"
+
+  - platform: zxh_bms
+    zxh_bms_id: pack_4
+    voltage:
+      name: "Pack 4 Voltage"
+    current:
+      name: "Pack 4 Current"
+    power:
+      name: "Pack 4 Power"
+    soc:
+      name: "Pack 4 SOC"
+    cell_min:
+      name: "Pack 4 Min Cell"
+    cell_max:
+      name: "Pack 4 Max Cell"
+    cell_delta:
+      name: "Pack 4 Cell Delta"
+    remaining_capacity:
+      name: "Pack 4 Remaining Capacity"
+    cycles:
+      name: "Pack 4 Cycles"
+    health:
+      name: "Pack 4 Health"
+    mos_temperature:
+      name: "Pack 4 MOS Temperature"
+    temperature:
+      - probe: 1
+        name: "Pack 4 Temperature 1"
+      - probe: 2
+        name: "Pack 4 Temperature 2"
+
+  - platform: zxh_bms
+    zxh_bms_id: pack_5
+    voltage:
+      name: "Pack 5 Voltage"
+    current:
+      name: "Pack 5 Current"
+    power:
+      name: "Pack 5 Power"
+    soc:
+      name: "Pack 5 SOC"
+    cell_min:
+      name: "Pack 5 Min Cell"
+    cell_max:
+      name: "Pack 5 Max Cell"
+    cell_delta:
+      name: "Pack 5 Cell Delta"
+    remaining_capacity:
+      name: "Pack 5 Remaining Capacity"
+    cycles:
+      name: "Pack 5 Cycles"
+    health:
+      name: "Pack 5 Health"
+    mos_temperature:
+      name: "Pack 5 MOS Temperature"
+    temperature:
+      - probe: 1
+        name: "Pack 5 Temperature 1"
+      - probe: 2
+        name: "Pack 5 Temperature 2"
