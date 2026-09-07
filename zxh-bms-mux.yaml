@@ -30,6 +30,8 @@ wifi:
   password: !secret wifi_password
 
 api:
+  encryption:
+    key: !secret api_key
 ota:
   - platform: esphome
 
@@ -130,30 +132,40 @@ text_sensor:
       name: "Pack 1 Cell Voltages"
     protection:
       name: "Pack 1 Protection State"
+    device_name:
+      name: "Pack 1 Bluetooth Name"
   - platform: zxh_bms
     zxh_bms_id: pack_2
     cells:
       name: "Pack 2 Cell Voltages"
     protection:
       name: "Pack 2 Protection State"
+    device_name:
+      name: "Pack 2 Bluetooth Name"
   - platform: zxh_bms
     zxh_bms_id: pack_3
     cells:
       name: "Pack 3 Cell Voltages"
     protection:
       name: "Pack 3 Protection State"
+    device_name:
+      name: "Pack 3 Bluetooth Name"
   - platform: zxh_bms
     zxh_bms_id: pack_4
     cells:
       name: "Pack 4 Cell Voltages"
     protection:
       name: "Pack 4 Protection State"
+    device_name:
+      name: "Pack 4 Bluetooth Name"
   - platform: zxh_bms
     zxh_bms_id: pack_5
     cells:
       name: "Pack 5 Cell Voltages"
     protection:
       name: "Pack 5 Protection State"
+    device_name:
+      name: "Pack 5 Bluetooth Name"
 
 sensor:
   - platform: zxh_bms

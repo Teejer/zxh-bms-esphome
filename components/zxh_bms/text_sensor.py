@@ -24,6 +24,9 @@ CONFIG_SCHEMA = cv.Schema(
             icon="mdi:information",
             entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
         ),
+        cv.Optional("device_name"): text_sensor.text_sensor_schema(
+            icon="mdi:bluetooth",
+        ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -43,3 +46,6 @@ async def to_code(config):
     if (conf := config.get("manufacture_date")) is not None:
         sens = await text_sensor.new_text_sensor(conf)
         cg.add(paren.set_manufacture_date_text_sensor(sens))
+    if (conf := config.get("device_name")) is not None:
+        sens = await text_sensor.new_text_sensor(conf)
+        cg.add(paren.set_device_name_text_sensor(sens))

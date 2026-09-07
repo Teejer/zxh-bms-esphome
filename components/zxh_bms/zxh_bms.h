@@ -88,6 +88,7 @@ class ZxhBMS : public PollingComponent, public ble_client::BLEClientNode {
   void set_protection_text_sensor(text_sensor::TextSensor *s) { this->protection_text_sensor_ = s; }
   void set_firmware_version_text_sensor(text_sensor::TextSensor *s) { this->firmware_text_sensor_ = s; }
   void set_manufacture_date_text_sensor(text_sensor::TextSensor *s) { this->date_text_sensor_ = s; }
+  void set_device_name_text_sensor(text_sensor::TextSensor *s) { this->device_name_text_sensor_ = s; }
 
  protected:
   enum class CyclePhase : uint8_t {
@@ -103,6 +104,7 @@ class ZxhBMS : public PollingComponent, public ble_client::BLEClientNode {
   uint16_t notify_handle_{0};
   uint16_t write_handle_{0};
   bool write_with_response_{true};
+  uint16_t device_name_handle_{0};
   std::vector<uint8_t> rx_;
 
   // Protocol state
@@ -163,12 +165,14 @@ class ZxhBMS : public PollingComponent, public ble_client::BLEClientNode {
   text_sensor::TextSensor *protection_text_sensor_{nullptr};
   text_sensor::TextSensor *firmware_text_sensor_{nullptr};
   text_sensor::TextSensor *date_text_sensor_{nullptr};
+  text_sensor::TextSensor *device_name_text_sensor_{nullptr};
 
   void reset_connection_state();
   void mux_loop();
   void try_connect_();
   void release_slot();
   void discover_profile();
+  void read_device_name();
   void publish_label(uint8_t cell_count, uint8_t temp_probes, float nominal_v, float nominal_ah, float full_ah);
   void publish_instrument(float current_a, uint8_t soc, float mos_temp, uint32_t equilibrium, uint16_t protection);
   void publish_basic(float capacity_ah, uint16_t cycles, uint8_t health);

@@ -104,6 +104,7 @@ void ZxhBMS::reset_connection_state() {
   this->profile_found_ = false;
   this->notify_registered_ = false;
   this->write_pending_ = false;
+  this->device_name_handle_ = 0;
   this->rx_.clear();
   this->queue_.clear();
   this->cmd_pos_ = 0;
@@ -118,8 +119,26 @@ void ZxhBMS::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc
                                  esp_ble_gattc_cb_param_t *param) {
   switch (event) {
     case ESP_GATTC_SEARCH_CMPL_EVT:
-      if (param->search_cmpl.status == ESP_GATT_OK && !this->profile_found_)
+      if (param->search_cmpl.status == ESP_GATT_OK && !this->profile_found_) {
         this->discover_profile();
+        this->read_device_name();
+      }
+      break;
+    case ESP_GATTC_READ_CHAR_EVT:
+      if (this->device_name_handle_ != 0 && param->read.handle == this->device_name_handle_ &&
+          this->device_name_text_sensor_ != nullptr) {
+        if (param->read.status == ESP_GATT_OK && param->read.value_len > 0) {
+          std::string name(reinterpret_cast<const char *>(param->read.value), param->read.value_len);
+          while (!name.empty() && (name.back() == '\0' || name.back() == ' '))
+            name.pop_back();
+          if (!name.empty()) {
+            this->device_name_text_sensor_->publish_state(name);
+            ESP_LOGI(TAG, "Device name: %s", name.c_str());
+          }
+        } else {
+          ESP_LOGD(TAG, "Device name read status=%d len=%d", (int) param->read.status, (int) param->read.value_len);
+        }
+      }
       break;
     case ESP_GATTC_REG_FOR_NOTIFY_EVT:
       if (param->reg_for_notify.status == ESP_GATT_OK) {
@@ -238,6 +257,45 @@ void ZxhBMS::discover_profile() {
     ESP_LOGW(TAG, "Service %s matched a known profile but has no notify/write pair", sbuf);
   }
   ESP_LOGE(TAG, "No known BMS GATT profile found on this device");
+}
+
+void ZxhBMS::read_device_name() {
+  // GAP Device Name characteristic (0x2A00 in the 0x1800 GAP service): the
+  // advertised "ZXH16S100A-*" string, read over GATT so it is available per
+  // connection regardless of what the advertisement carried.
+  if (this->device_name_text_sensor_ == nullptr)
+    return;
+  auto gattc_if = (esp_gatt_if_t) this->parent_->get_gattc_if();
+  auto conn_id = this->parent_->get_conn_id();
+  for (uint16_t si = 0; si < 64; si++) {
+    esp_gattc_service_elem_t svc;
+    uint16_t n = 1;
+    if (esp_ble_gattc_get_service(gattc_if, conn_id, nullptr, &svc, &n, si) != ESP_GATT_OK || n == 0)
+      break;
+    char sbuf[37];
+    espbt::ESPBTUUID::from_uuid(svc.uuid).as_128bit().to_str(sbuf);
+    if (strncmp(sbuf, "00001800", 8) != 0)  // GAP service (0x1800) only
+      continue;
+    for (uint16_t ci = 0; ci < 64; ci++) {
+      esp_gattc_char_elem_t chr;
+      uint16_t cn = 1;
+      if (esp_ble_gattc_get_all_char(gattc_if, conn_id, svc.start_handle, svc.end_handle, &chr, &cn, ci) !=
+              ESP_GATT_OK ||
+          cn == 0)
+        break;
+      if (espbt::ESPBTUUID::from_uuid(chr.uuid).as_128bit() ==
+          espbt::ESPBTUUID::from_raw("00002A00-0000-1000-8000-00805F9B34FB")) {
+        this->device_name_handle_ = chr.char_handle;
+        auto err = esp_ble_gattc_read_char(gattc_if, conn_id, chr.char_handle, ESP_GATT_AUTH_REQ_NONE);
+        if (err != ESP_OK)
+          ESP_LOGW(TAG, "esp_ble_gattc_read_char (device name) failed: %d", err);
+        return;
+      }
+    }
+    ESP_LOGD(TAG, "GAP service present but no Device Name (0x2A00) characteristic");
+    return;
+  }
+  ESP_LOGD(TAG, "No GAP (0x1800) service; device name unavailable via GATT");
 }
 
 void ZxhBMS::update() {
