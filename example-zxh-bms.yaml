@@ -28,6 +28,10 @@ ota:
 
 logger:
 
+# Syncs the ESP32 clock from Home Assistant so last_scan timestamps are real time.
+time:
+  - platform: homeassistant
+
 # ble_client requires the BLE tracker to find the battery
 esp32_ble_tracker:
 
@@ -66,6 +70,8 @@ text_sensor:
       name: "BMS Manufacture Date"
     device_name:
       name: "BMS Bluetooth Name"
+    last_scan:
+      name: "BMS Last Scan"
 
 sensor:
   - platform: zxh_bms

@@ -45,7 +45,9 @@ mode (see [Multiple batteries](#multiple-batteries)).
   label info (cell count, nominal/full Ah). Text sensors: per-cell voltages
   as JSON, active protection faults, firmware version, manufacture date,
   and the BMS Bluetooth device name read from GATT (0x2A00, e.g.
-  `ZXH16S100A-*`) via the `device_name:` text sensor.
+  `ZXH16S100A-*`) via the `device_name:` text sensor. Add a `time:` platform
+  (e.g. `homeassistant`) and a `last_scan:` text sensor to stamp each
+  successful poll cycle with a real-time timestamp.
   Binary sensors: protection active, balancing active.
 
 ## Usage

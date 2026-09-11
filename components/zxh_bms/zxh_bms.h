@@ -89,6 +89,7 @@ class ZxhBMS : public PollingComponent, public ble_client::BLEClientNode {
   void set_firmware_version_text_sensor(text_sensor::TextSensor *s) { this->firmware_text_sensor_ = s; }
   void set_manufacture_date_text_sensor(text_sensor::TextSensor *s) { this->date_text_sensor_ = s; }
   void set_device_name_text_sensor(text_sensor::TextSensor *s) { this->device_name_text_sensor_ = s; }
+  void set_last_scan_text_sensor(text_sensor::TextSensor *s) { this->last_scan_text_sensor_ = s; }
 
  protected:
   enum class CyclePhase : uint8_t {
@@ -166,6 +167,7 @@ class ZxhBMS : public PollingComponent, public ble_client::BLEClientNode {
   text_sensor::TextSensor *firmware_text_sensor_{nullptr};
   text_sensor::TextSensor *date_text_sensor_{nullptr};
   text_sensor::TextSensor *device_name_text_sensor_{nullptr};
+  text_sensor::TextSensor *last_scan_text_sensor_{nullptr};
 
   void reset_connection_state();
   void mux_loop();
@@ -179,6 +181,7 @@ class ZxhBMS : public PollingComponent, public ble_client::BLEClientNode {
   void publish_temps(const float *temps);
   void publish_manufacturer(const std::string &date, const std::string &firmware);
   void publish_summary();
+  void publish_last_scan();
   void start_identify_cycle();
   void start_status_cycle();
   void transmit(const Command &cmd);

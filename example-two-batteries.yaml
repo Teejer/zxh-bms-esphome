@@ -32,6 +32,10 @@ ota:
 
 logger:
 
+# Syncs the ESP32 clock from Home Assistant so last_scan timestamps are real time.
+time:
+  - platform: homeassistant
+
 esp32_ble_tracker:
 
 ble_client:
@@ -69,12 +73,16 @@ text_sensor:
       name: "Pack A Cell Voltages"
     device_name:
       name: "Pack A Bluetooth Name"
+    last_scan:
+      name: "Pack A Last Scan"
   - platform: zxh_bms
     zxh_bms_id: batt_b
     cells:
       name: "Pack B Cell Voltages"
     device_name:
       name: "Pack B Bluetooth Name"
+    last_scan:
+      name: "Pack B Last Scan"
 
 sensor:
   - platform: zxh_bms

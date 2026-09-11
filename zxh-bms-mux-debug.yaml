@@ -46,6 +46,10 @@ logger:
     text_sensor: INFO
     binary_sensor: INFO
 
+# Syncs the ESP32 clock from Home Assistant so last_scan timestamps are real time.
+time:
+  - platform: homeassistant
+
 esp32_ble:
   max_connections: 5
 
@@ -142,6 +146,8 @@ text_sensor:
       name: "Pack 1 Protection State"
     device_name:
       name: "Pack 1 Bluetooth Name"
+    last_scan:
+      name: "Pack 1 Last Scan"
   - platform: zxh_bms
     zxh_bms_id: pack_2
     cells:
@@ -150,6 +156,8 @@ text_sensor:
       name: "Pack 2 Protection State"
     device_name:
       name: "Pack 2 Bluetooth Name"
+    last_scan:
+      name: "Pack 2 Last Scan"
   - platform: zxh_bms
     zxh_bms_id: pack_3
     cells:
@@ -158,6 +166,8 @@ text_sensor:
       name: "Pack 3 Protection State"
     device_name:
       name: "Pack 3 Bluetooth Name"
+    last_scan:
+      name: "Pack 3 Last Scan"
   - platform: zxh_bms
     zxh_bms_id: pack_4
     cells:
@@ -166,6 +176,8 @@ text_sensor:
       name: "Pack 4 Protection State"
     device_name:
       name: "Pack 4 Bluetooth Name"
+    last_scan:
+      name: "Pack 4 Last Scan"
   - platform: zxh_bms
     zxh_bms_id: pack_5
     cells:
@@ -174,6 +186,8 @@ text_sensor:
       name: "Pack 5 Protection State"
     device_name:
       name: "Pack 5 Bluetooth Name"
+    last_scan:
+      name: "Pack 5 Last Scan"
 
 sensor:
   - platform: zxh_bms

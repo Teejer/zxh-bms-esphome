@@ -2,6 +2,7 @@
 
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
+#include "esphome/core/time.h"
 
 #ifdef USE_ESP32
 
@@ -462,6 +463,7 @@ void ZxhBMS::advance_cycle() {
   } else {
     this->phase_ = CyclePhase::IDLE;
     this->publish_summary();
+    this->publish_last_scan();
     if (this->sequential_)
       this->release_slot();  // done reading; pass the radio to the next battery
   }
@@ -666,6 +668,18 @@ void ZxhBMS::publish_manufacturer(const std::string &date, const std::string &fi
     this->date_text_sensor_->publish_state(date);
   if (this->firmware_text_sensor_ != nullptr && !firmware.empty())
     this->firmware_text_sensor_->publish_state(firmware);
+}
+
+void ZxhBMS::publish_last_scan() {
+  if (this->last_scan_text_sensor_ == nullptr)
+    return;
+  const time_t epoch = ::time(nullptr);  // set by the `time:` platform (e.g. homeassistant)
+  if (epoch < 1577836800) {              // before 2020: RTC was never synced
+    ESP_LOGD(TAG, "Real-time clock not synced; skipping last-scan timestamp");
+    return;
+  }
+  ESPTime utc = ESPTime::from_epoch_utc(epoch);
+  this->last_scan_text_sensor_->publish_state(utc.strftime("%Y-%m-%dT%H:%M:%S+00:00"));
 }
 
 void ZxhBMS::publish_summary() {

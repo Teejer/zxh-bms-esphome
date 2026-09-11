@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import text_sensor
-from esphome.const import ENTITY_CATEGORY_DIAGNOSTIC
+from esphome.const import DEVICE_CLASS_TIMESTAMP, ENTITY_CATEGORY_DIAGNOSTIC
 
 from . import CONF_ZXH_BMS_ID, ZxhBMS
 
@@ -27,6 +27,11 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional("device_name"): text_sensor.text_sensor_schema(
             icon="mdi:bluetooth",
         ),
+        cv.Optional("last_scan"): text_sensor.text_sensor_schema(
+            icon="mdi:clock-check-outline",
+            device_class=DEVICE_CLASS_TIMESTAMP,
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+        ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -49,3 +54,6 @@ async def to_code(config):
     if (conf := config.get("device_name")) is not None:
         sens = await text_sensor.new_text_sensor(conf)
         cg.add(paren.set_device_name_text_sensor(sens))
+    if (conf := config.get("last_scan")) is not None:
+        sens = await text_sensor.new_text_sensor(conf)
+        cg.add(paren.set_last_scan_text_sensor(sens))
